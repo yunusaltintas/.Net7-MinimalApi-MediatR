@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Mam.Application\Mam.Application.csproj" />
+    <ProjectReference Include="..\Mam.Persistence\Mam.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>
