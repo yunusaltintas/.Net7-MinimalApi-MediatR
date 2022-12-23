@@ -1,4 +1,5 @@
 ﻿using Mam.Domain.Entities;
+using Mam.Persistence.EntityTypeBuilder;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
