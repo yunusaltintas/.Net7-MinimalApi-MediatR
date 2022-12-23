@@ -12,21 +12,21 @@ namespace Mam.Application.Commands.Reservartion.CreateReservation
 {
     public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, CreateReservationDto>
     {
-        public IUnitOfWork unitOfWork { get; }
-        private readonly IGenericRepository<Domain.Entities.Reservation> repository;
+        public IUnitOfWork _unitOfWork { get; }
+        private readonly IRepository<Domain.Entities.Reservation> _repository;
 
-        public CreateReservationCommandHandler(IGenericRepository<Domain.Entities.Reservation> repository, IUnitOfWork unitOfWork)
+        public CreateReservationCommandHandler(IRepository<Domain.Entities.Reservation> repository, IUnitOfWork unitOfWork)
         {
-            this.repository = repository;
-            this.unitOfWork = unitOfWork;
+            _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
 
         public async Task<CreateReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
 
-            var response = await repository.AddAsync(request.ToReservation());
-            await unitOfWork.CommitAsync();
+            var response = await _repository.AddAsync(request.ToReservation());
+            await _unitOfWork.CommitAsync();
 
             return response.ToCreateReservationDto();
         }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Mam.Application.Interfaces.IRepository
 {
-    public interface IGenericRepository<TEntity> where TEntity : class
+    public interface IRepository<TEntity> where TEntity : class
     {
         Task<TEntity> GetByIdAsync(Guid id);
 

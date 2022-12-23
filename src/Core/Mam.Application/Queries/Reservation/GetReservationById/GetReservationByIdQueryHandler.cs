@@ -11,15 +11,15 @@ namespace Mam.Application.Queries.Reservation.GetReservationById
 {
     public class GetReservationByIdQueryHandler : IRequestHandler<GetReservationByIdQuery, ReservationByIdDto>
     {
-        private readonly IGenericRepository<Domain.Entities.Reservation> repository;
+        private readonly IRepository<Domain.Entities.Reservation> _repository;
 
-        public GetReservationByIdQueryHandler(IGenericRepository<Domain.Entities.Reservation> repository)
+        public GetReservationByIdQueryHandler(IRepository<Domain.Entities.Reservation> repository)
         {
-            this.repository = repository;
+            _repository = repository;
         }
         public async Task<ReservationByIdDto> Handle(GetReservationByIdQuery request, CancellationToken cancellationToken)
         {
-            var response = await repository.GetByIdAsync(request.Id);
+            var response = await _repository.GetByIdAsync(request.Id);
             return response.ToReservationByIdDto();
         }
     }

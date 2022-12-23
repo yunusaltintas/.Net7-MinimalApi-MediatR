@@ -7,9 +7,9 @@ namespace Mam.Api.Controller
     [AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
-    public class GenelController : ControllerBase
+    public class DummyController : ControllerBase
     {
-        public GenelController()
+        public DummyController()
         {
 
         }

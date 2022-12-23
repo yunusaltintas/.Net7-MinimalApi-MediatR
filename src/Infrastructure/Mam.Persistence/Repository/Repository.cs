@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Mam.Persistence.Repository
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         protected readonly DbContext _context;
         private readonly DbSet<TEntity> _dbSet;
-        public GenericRepository(HotelDbContext context)
+        public Repository(HotelDbContext context)
         {
             _context = context;
             _dbSet = context.Set<TEntity>();
