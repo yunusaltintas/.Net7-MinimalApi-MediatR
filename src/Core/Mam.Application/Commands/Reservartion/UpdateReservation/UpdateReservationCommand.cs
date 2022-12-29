@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Mam.Application.Commands.Reservartion.UpdateReservation
 {
-    public class UpdateReservationCommand : IRequest<UpdateReservationDto>
+    public class UpdateReservationCommand : IRequest
     {
         [JsonIgnore]
         public Guid Id { get; set; }

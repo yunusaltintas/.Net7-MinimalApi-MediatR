@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 
 namespace Mam.Application.Commands.Reservartion.UpdateReservation
 {
-    public class UpdateReservationCommandHandler : IRequestHandler<UpdateReservationCommand, UpdateReservationDto>
+    public class UpdateReservationCommandHandler : AsyncRequestHandler<UpdateReservationCommand>
     {
-        public Task<UpdateReservationDto> Handle(UpdateReservationCommand request, CancellationToken cancellationToken)
+        protected override Task Handle(UpdateReservationCommand request, CancellationToken cancellationToken)
         {
-
-            //write cod
             throw new NotImplementedException();
         }
     }
