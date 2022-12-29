@@ -16,7 +16,6 @@ namespace Mam.Api.Controller
 
 
         [HttpGet]
-        [OutputCache(PolicyName = "Custom")]
         public ActionResult Index()
         {
 

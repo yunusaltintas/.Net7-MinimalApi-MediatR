@@ -1,5 +1,7 @@
+using Azure.Core;
 using Mam.Api.Extensions;
 using Mam.Application.Commands.Reservartion.CreateReservation;
+using Mam.Application.Commands.Reservartion.UpdateReservation;
 using Mam.Application.Interfaces.IRepository;
 using Mam.Application.Interfaces.IUnitOfWork;
 using Mam.Application.Queries.Reservation.GetReservationById;
@@ -7,6 +9,7 @@ using Mam.Persistence.Context;
 using Mam.Persistence.Repository;
 using Mam.Persistence.UnitOfWork;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -14,8 +17,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddControllers();
 builder.Services.AddDbContext<HotelDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -26,50 +28,60 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(x => x.AsScoped(), typeof(CreateReservationCommand));
 
-
-//builder.Services.AddOutputCache(options =>
-//{
-//    options.AddBasePolicy(builder =>
-//    {
-//        builder.Expire(TimeSpan.FromSeconds(10));
-//    });
-//});
-
-
-builder.Services.AddOutputCache(options =>
-{
-    options.AddPolicy("Custom", builder =>
-    {
-        builder.Expire(TimeSpan.FromSeconds(5));
-    });
-});
-
-
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("Fixed", builder =>
+    options.AddFixedWindowLimiter("fixed", _options =>
     {
-        builder.Window = TimeSpan.FromSeconds(10);
-        builder.PermitLimit = 3;
-        builder.QueueLimit = 1;
-        builder.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-    });
-});
-
-builder.Services.AddRateLimiter(options =>
-{
-    options.AddConcurrencyLimiter("concurrency", _options =>
-    {
-        _options.PermitLimit = 15;
+        _options.Window = TimeSpan.FromSeconds(20);
+        _options.PermitLimit = 3;
         _options.QueueLimit = 1;
         _options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
     });
-    options.RejectionStatusCode = 429;
-    options.OnRejected = (context, CancellationToken) =>
+
+
+    // -------- --------    ---------------------
+    options.AddSlidingWindowLimiter("sliding", _options =>
     {
-        //logging
-        return new();
-    };
+        _options.Window = TimeSpan.FromSeconds(20);
+        _options.PermitLimit = 3;
+        _options.QueueLimit = 1;
+        _options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        _options.SegmentsPerWindow = 2;
+    });
+
+
+    options.AddConcurrencyLimiter("concurrency", _options =>
+    {
+        _options.PermitLimit = 10;
+        _options.QueueLimit = 1;
+        _options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+
+
+    options.AddTokenBucketLimiter("Token", _options =>
+    {
+        _options.TokensPerPeriod = 4;
+        _options.TokenLimit = 4;
+        _options.QueueLimit = 1;
+        _options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        _options.ReplenishmentPeriod = TimeSpan.FromSeconds(20);
+    });
+
+
+    options.RejectionStatusCode = 429;
+});
+
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(_opt =>
+    {
+        _opt.Expire(TimeSpan.FromSeconds(20));
+    });
+
+    options.AddPolicy("5sn", _opt =>
+    {
+        _opt.Expire(TimeSpan.FromSeconds(5));
+    });
 });
 
 var app = builder.Build();
@@ -80,49 +92,31 @@ app.UseSwaggerUI();
 app.MapControllers();
 
 app.UseOutputCache();
-app.UseRateLimiter();
+//app.UseRateLimiter();
 
 
-app.Get<GetReservationByIdQuery>("reservation/{id}");
-app.Post<CreateReservationCommand>("reservation");
-
-
-app.MapGet("deneme", (int? age) =>
+app.MapGet("datetime", () =>
 {
     return Results.Ok(new
     {
-        message = "age: " + age
+        Datetime = DateTime.Now
     });
+}).CacheOutput("5sn");
+
+app.MapGet("reservations/{id}", async (IMediator mediator, Guid id) =>
+{
+    await mediator.Send(new GetReservationByIdQuery(id));
 });
 
-
-app.MapGet("ratelimit", () =>
+app.MapPost("reservations", async (IMediator mediator, [FromBody] CreateReservationCommand request) =>
 {
-    return Results.Ok(new
-    {
-        DateTime = DateTime.Now,
-    });
-}).RequireRateLimiting("Basic");
+    await mediator.Send(request);
+});
 
-
-//app.MapGet("cache", () =>
-//{
-//    return Results.Ok(new
-//    {
-//        DateTime = DateTime.Now,
-
-//    });
-//}).CacheOutput();
-
-
-app.MapGet("CustomCache", () =>
+app.MapPut("reservations/{id}", async (IMediator mediator, Guid id, [FromBody] UpdateReservationCommand request) =>
 {
-    return Results.Ok(new
-    {
-        DateTime = DateTime.Now,
-
-    });
-}).CacheOutput("Custom");
+    await mediator.Send(request);
+});
 
 app.DatabaseInitialize();
 app.Run();

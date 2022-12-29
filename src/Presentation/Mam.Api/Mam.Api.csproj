@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Mam.Application\Mam.Application.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\Mam.Infrastructure\Mam.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Mam.Persistence\Mam.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

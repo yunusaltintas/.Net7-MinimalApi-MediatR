@@ -9,6 +9,11 @@ namespace Mam.Application.Queries.Reservation.GetReservationById
 {
     public class GetReservationByIdQuery : IRequest<ReservationByIdDto>
     {
+        public GetReservationByIdQuery(Guid id)
+        {
+            Id = id;
+        }
+
         public Guid Id { get; set; }
     }
 }
